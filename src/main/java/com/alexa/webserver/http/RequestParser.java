@@ -25,6 +25,7 @@ public class RequestParser {
             request.setUrl(split[1]);
             request.setMethod(HttpMethod.valueOf(split[0]));
         } catch (IOException e) {
+            // TODO throw new kind of exception and handle it in RequestHandler with BadRequest resp
             System.out.println("[ERROR] Failed to read request line");
             e.printStackTrace();
         }

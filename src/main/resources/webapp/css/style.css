@@ -1,6 +1,95 @@
 body {
-    padding : 50px 100px;
-    background-color: coral;
+    background: url(../images/bombai.jpg);
+    background-repeat: no-repeat;
+    background-position: center 49px;
+    background-size:cover;
+    -webkit-background-size: cover;
+    -moz-background-size:cover;
+    -o-background-size:cover;
+    color: white;
+}
+
+.contact-title{
+    margin-top: 50px;
+    color: #fff;
+    text-transform: uppercase;
+    transition: all 4s ease-in-out;
+}
+
+form{
+    margin-top: 10px;
+    transition: all 4s ease-in-out;
+    width: 350px;
+}
+
+.form-control{
+    background: transparent;
+    border: none;
+    outline: none;
+    border-bottom: 1px green;
+    color: greenyellow;
+    font-size: 18px;
+    margin-bottom: 16px;
+
+}
+
+input{
+    height: 45px;
+}
+
+form.submit{
+    background: #ff5722;
+    border-color: transparent;
+    color: greenyellow;
+    font-size: 10px;
+    width: 40px;
+}
+
+.gallery{
+    margin: 10px 50px;
+}
+.gallery.img{
+    transition: 1s;
+    padding: 15px;
+    width: 100px;
+
+}
+.gallery.img:hover{
+    filter: grayscale(100%);
+    transform: scale(1.1);
+}
+
+.nav{
+    background: none;
+    border: none;
+}
+
+div.gallery {
+    margin: 5px;
+    border: 1px solid #ccc;
+    float: left;
+    width: 180px;
+}
+
+div.gallery:hover {
+    border: 1px solid #777;
+}
+
+div.gallery img {
+    width: 100%;
+    height: auto;
+}
+
+div.desc {
+    padding: 15px;
     text-align: center;
-    font-size: 22px;
+    background-color: blanchedalmond;
+}
+.gallery{
+    background: url(../images/bombai.jpg);
+}
+
+.centered {
+    margin: 0 auto;
+    width: 70%;
 }

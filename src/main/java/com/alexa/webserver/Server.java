@@ -1,7 +1,6 @@
 package com.alexa.webserver;
 
 import com.alexa.webserver.http.RequestHandler;
-import com.alexa.webserver.io.ResourceReader;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -19,17 +18,18 @@ public class Server {
             Socket socket = serverSocket.accept();
             System.out.println("Socket is connected");
 
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+            InputStream socketIS = socket.getInputStream();
+            BufferedOutputStream socketOS = new BufferedOutputStream(socket.getOutputStream());
 
             RequestHandler requestHandler = new RequestHandler();
-            requestHandler.setReader(bufferedReader);
-            requestHandler.setWriter(bufferedWriter);
-
-            requestHandler.handle();
+            requestHandler.setSocketIS(socketIS);
+            requestHandler.setSocketOS(socketOS);
+            try {
+                requestHandler.handle();
+            } catch (Exception e) {
+                System.out.println("[ERROR] Unable to handle request.");
+                e.printStackTrace();
+            }
 
         }
 

@@ -1,7 +1,8 @@
 package com.alexa.webserver.entity;
 
 public enum HttpMethod {
-    GET ("GET") , POST ("POST");
+    GET ("GET"),
+    POST ("POST");
 
     private String name;
 

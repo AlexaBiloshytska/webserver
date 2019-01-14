@@ -1,42 +1,43 @@
 package com.alexa.webserver.http;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import com.alexa.webserver.entity.HttpStatusCode;
+
+import java.io.*;
 
 public class ResponseWriter {
-    private BufferedWriter writer;
+    private BufferedOutputStream writer;
+    private static final byte[] BUFFER = new byte[8142];
 
-    public void writeSuccessResponse(String content) throws IOException {
+    public void writeStatusLine(HttpStatusCode statusCode) throws IOException {
+        String statusLine = "HTTP/1.1 " + statusCode.getStatus();
 
-        System.out.println("\n[INFO] Generating response");
-        String statusCode = "200 OK";
-        writeStatusLine(statusCode);
+        System.out.println("[INFO] Sending status line : " + statusLine);
 
-        writer.write(content);
+        writer.write(statusLine.getBytes());
+        writer.write("\n".getBytes());
+        writer.write("\n".getBytes());
+    }
+
+    public void writeContent(BufferedInputStream content) {
+        // TODO : add logs
+        try {
+            int length;
+            while ((length = content.read(BUFFER)) != -1) {
+                writer.write(BUFFER, 0, length);
+            }
+        } catch(IOException e){
+            System.out.println("[ERROR]"); // TODO : where description
+        } finally {
+            // TODO : close content stream
+        }
+    }
+
+    public void finishResponse() throws IOException{
         writer.flush();
         writer.close();
     }
 
-    public void writeNotFoundResponse () throws IOException {
-        String statusCode = "404 NOT FOUND";
-        writeStatusLine(statusCode);
-
-        writer.flush();
-        writer.close();
-    }
-
-    public void writeStatusLine(String statusCode) throws IOException {
-        writer.write("HTTP/1.1 " + statusCode);
-        writer.newLine();
-        writer.newLine();
-    }
-
-    public void writeHeaders(){
-    }
-
-
-    public void setWriter(BufferedWriter writer) {
+    public void setWriter(BufferedOutputStream writer) {
         this.writer = writer;
     }
 }

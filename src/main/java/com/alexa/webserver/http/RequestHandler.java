@@ -1,43 +1,51 @@
 package com.alexa.webserver.http;
 
+import com.alexa.webserver.entity.HttpStatusCode;
 import com.alexa.webserver.entity.Request;
+import com.alexa.webserver.exception.InvalidPathRequested;
 import com.alexa.webserver.io.ResourceReader;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 
 public class RequestHandler {
-    private BufferedReader reader;
-    private BufferedWriter writer;
-    private ResourceReader resourceReader;
-    private RequestParser requestParser = new RequestParser(); // Problem with object creation
+    private InputStream socketIS;
+    private BufferedOutputStream socketOS;
+    private RequestParser requestParser = new RequestParser();
+    private ResourceReader resourceReader = new ResourceReader();
+    private ResponseWriter responseWriter = new ResponseWriter();
 
-    public void handle () {
-        //1. Parse request
-        Request request =  requestParser.parserRequest(reader);
-        String reader = request.getUrl();
-
-        //2.Read content and transfer it to string
-        ResourceReader resourceReader = new ResourceReader();
-        String content = resourceReader.readContent(reader);
-
-        //3. Transfer data to the writer
-        ResponseWriter responseWriter = new ResponseWriter();
-        responseWriter.setWriter(writer);
+    public void handle () throws IOException {
+        responseWriter.setWriter(socketOS);
         try {
-            responseWriter.writeSuccessResponse(content);
+            //1. Parse request
+            BufferedReader socketReader = new BufferedReader(new InputStreamReader(socketIS));
+            Request request = requestParser.parserRequest(socketReader);
+            String url = request.getUrl();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            //2.Read content and transfer it to string
+            BufferedInputStream content = resourceReader.readByteContent(url);
+
+            //3. Transfer data to the socketOS
+
+            responseWriter.writeStatusLine(HttpStatusCode.OK);
+            responseWriter.writeContent(content);
+            responseWriter.finishResponse();
+        } catch (InvalidPathRequested invalidPath) {
+            System.out.println("[ERROR] Path not found: " + invalidPath.getMessage());
+            responseWriter.writeStatusLine(HttpStatusCode.NOT_FOUND);
+            responseWriter.finishResponse();
+        } catch (Exception e) {
+            System.out.println("[ERROR] Exception during processing request");
+            responseWriter.writeStatusLine(HttpStatusCode.INTERNAL_ERROR);
+            responseWriter.finishResponse();
         }
     }
 
-    public void setReader(BufferedReader reader) {
-        this.reader = reader;
+    public void setSocketIS(InputStream socketIS) {
+        this.socketIS = socketIS;
     }
 
-    public void setWriter(BufferedWriter writer) {
-        this.writer = writer;
+    public void setSocketOS(BufferedOutputStream socketOS) {
+        this.socketOS = socketOS;
     }
 }
