@@ -18,11 +18,11 @@ public class Server {
             Socket socket = serverSocket.accept();
             System.out.println("Socket is connected");
 
-            InputStream socketIS = socket.getInputStream();
+            BufferedReader socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedOutputStream socketOS = new BufferedOutputStream(socket.getOutputStream());
 
             RequestHandler requestHandler = new RequestHandler();
-            requestHandler.setSocketIS(socketIS);
+            requestHandler.setSocketReader(socketReader);
             requestHandler.setSocketOS(socketOS);
             try {
                 requestHandler.handle();

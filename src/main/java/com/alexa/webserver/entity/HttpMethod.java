@@ -1,5 +1,7 @@
 package com.alexa.webserver.entity;
 
+import com.alexa.webserver.exception.WebServerException;
+
 public enum HttpMethod {
     GET ("GET"),
     POST ("POST");
@@ -16,6 +18,8 @@ public enum HttpMethod {
                 return httpMethod;
             }
         }
-        throw new IllegalArgumentException("No HttpMethod with name " + name + "found");
+        throw new WebServerException("No HttpMethod with name " + name + "found",
+                null,
+                HttpStatusCode.METHOD_NOT_ALLOWED);
     }
 }

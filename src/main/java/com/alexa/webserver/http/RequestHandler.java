@@ -1,48 +1,45 @@
 package com.alexa.webserver.http;
 
+import com.alexa.webserver.entity.HttpMethod;
 import com.alexa.webserver.entity.HttpStatusCode;
 import com.alexa.webserver.entity.Request;
-import com.alexa.webserver.exception.InvalidPathRequested;
+import com.alexa.webserver.exception.WebServerException;
 import com.alexa.webserver.io.ResourceReader;
 
 import java.io.*;
 
 public class RequestHandler {
-    private InputStream socketIS;
+    private BufferedReader socketReader;
     private BufferedOutputStream socketOS;
     private RequestParser requestParser = new RequestParser();
     private ResourceReader resourceReader = new ResourceReader();
-    private ResponseWriter responseWriter = new ResponseWriter();
 
     public void handle () throws IOException {
-        responseWriter.setWriter(socketOS);
-        try {
-            //1. Parse request
-            BufferedReader socketReader = new BufferedReader(new InputStreamReader(socketIS));
-            Request request = requestParser.parserRequest(socketReader);
-            String url = request.getUrl();
+        try (ResponseWriter responseWriter = new ResponseWriter(socketOS)) {
+            try {
+                Request request = requestParser.parserRequest(socketReader);
+                System.out.println("[INFO] Request is received : " + request);
 
-            //2.Read content and transfer it to string
-            BufferedInputStream content = resourceReader.readByteContent(url);
+                if (!request.getMethod().equals(HttpMethod.GET)) {
+                    throw new WebServerException("Method is nt allowed", null, HttpStatusCode.METHOD_NOT_ALLOWED);
+                }
 
-            //3. Transfer data to the socketOS
-
-            responseWriter.writeStatusLine(HttpStatusCode.OK);
-            responseWriter.writeContent(content);
-            responseWriter.finishResponse();
-        } catch (InvalidPathRequested invalidPath) {
-            System.out.println("[ERROR] Path not found: " + invalidPath.getMessage());
-            responseWriter.writeStatusLine(HttpStatusCode.NOT_FOUND);
-            responseWriter.finishResponse();
-        } catch (Exception e) {
-            System.out.println("[ERROR] Exception during processing request");
-            responseWriter.writeStatusLine(HttpStatusCode.INTERNAL_ERROR);
-            responseWriter.finishResponse();
+                responseWriter.writeStatusLine(HttpStatusCode.OK);
+                responseWriter.setContent(resourceReader.readByteContent(request.getUrl()));
+                responseWriter.writeContent();
+            } catch (WebServerException e) {
+                System.out.println("[ERROR] " + e.getMessage());
+                responseWriter.writeStatusLine(e.getHttpStatusCode());
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                System.out.println("[ERROR] Exception during processing request");
+                responseWriter.writeStatusLine(HttpStatusCode.INTERNAL_ERROR);
+            }
         }
     }
 
-    public void setSocketIS(InputStream socketIS) {
-        this.socketIS = socketIS;
+    public void setSocketReader(BufferedReader socketIS) {
+        this.socketReader = socketIS;
     }
 
     public void setSocketOS(BufferedOutputStream socketOS) {

@@ -1,7 +1,9 @@
 package com.alexa.webserver.http;
 
 import com.alexa.webserver.entity.HttpMethod;
+import com.alexa.webserver.entity.HttpStatusCode;
 import com.alexa.webserver.entity.Request;
+import com.alexa.webserver.exception.WebServerException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,16 +20,14 @@ public class RequestParser {
      }
 
 
-    private void injectUrlAndMethod (Request request, BufferedReader reader){
+    private void injectUrlAndMethod (Request request, BufferedReader reader) {
         try {
             String requestLine = reader.readLine();
             String[] split = requestLine.split(" ");
             request.setUrl(split[1]);
             request.setMethod(HttpMethod.valueOf(split[0]));
         } catch (IOException e) {
-            // TODO throw new kind of exception and handle it in RequestHandler with BadRequest resp
-            System.out.println("[ERROR] Failed to read request line");
-            e.printStackTrace();
+            throw new WebServerException("Failed to read request line", e, HttpStatusCode.BAD_REQUEST);
         }
     }
 
