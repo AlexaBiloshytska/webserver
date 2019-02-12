@@ -17,7 +17,7 @@ public class ResponseWriter implements Closeable {
     public void writeStatusLine(HttpStatusCode statusCode) throws IOException {
         String statusLine = "HTTP/1.1 " + statusCode.getStatus();
 
-        System.out.println("[INFO] Sending status line : " + statusLine);
+        System.out.println( Thread.currentThread().getName() + " [INFO] Sending status line : " + statusLine);
 
         writer.write(statusLine.getBytes());
         writer.write("\n".getBytes());
@@ -25,7 +25,7 @@ public class ResponseWriter implements Closeable {
     }
 
     public void writeContent()throws IOException {
-        System.out.println("[INFO] Sending content data");
+        System.out.println(Thread.currentThread().getName() + " [INFO] Sending content data");
         try {
             int length;
             while ((length = content.read(BUFFER)) != -1) {
@@ -40,7 +40,7 @@ public class ResponseWriter implements Closeable {
     public void close() throws IOException {
         writer.close();
         content.close();
-        System.out.println("[INFO] Resources are released");
+        System.out.println( Thread.currentThread().getName() + " [INFO] Resources are released");
     }
 
     public void setContent(BufferedInputStream content) {

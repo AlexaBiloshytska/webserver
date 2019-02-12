@@ -41,7 +41,7 @@ public class RequestParser {
             }
             request.setHeaders(headers);
         } catch (IOException e) {
-            System.out.println("[ERROR] Failed to parse headers from request");
+            System.out.println( Thread.currentThread().getName() + " [ERROR] Failed to parse headers from request");
             e.printStackTrace();
         }
     }

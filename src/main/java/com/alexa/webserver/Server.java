@@ -12,11 +12,11 @@ public class Server {
 
     public void start() throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
-        System.out.println("ServerSocked initiated on port: " + port);
+        System.out.println( Thread.currentThread().getName() + " ServerSocked initiated on port: " + port);
 
         while (true) {
             Socket socket = serverSocket.accept();
-            System.out.println("Socket is connected");
+            System.out.println( Thread.currentThread().getName() + " Socket is connected");
 
             BufferedReader socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedOutputStream socketOS = new BufferedOutputStream(socket.getOutputStream());
@@ -25,9 +25,11 @@ public class Server {
             requestHandler.setSocketReader(socketReader);
             requestHandler.setSocketOS(socketOS);
             try {
-                requestHandler.handle();
+                Thread thread = new Thread(requestHandler);
+                thread.start();
+                System.out.println(thread.getName() + " thread started to handle requests");
             } catch (Exception e) {
-                System.out.println("[ERROR] Unable to handle request.");
+                System.out.println(Thread.currentThread().getName() + " [ERROR] Unable to handle request.");
                 e.printStackTrace();
             }
 

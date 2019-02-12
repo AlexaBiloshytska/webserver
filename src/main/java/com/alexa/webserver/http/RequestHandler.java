@@ -8,7 +8,7 @@ import com.alexa.webserver.io.ResourceReader;
 
 import java.io.*;
 
-public class RequestHandler {
+public class RequestHandler implements Runnable{
     private BufferedReader socketReader;
     private BufferedOutputStream socketOS;
     private RequestParser requestParser = new RequestParser();
@@ -18,7 +18,7 @@ public class RequestHandler {
         try (ResponseWriter responseWriter = new ResponseWriter(socketOS)) {
             try {
                 Request request = requestParser.parserRequest(socketReader);
-                System.out.println("[INFO] Request is received : " + request);
+                System.out.println(Thread.currentThread().getName() + " [INFO] Request is received : " + request);
 
                 if (!request.getMethod().equals(HttpMethod.GET)) {
                     throw new WebServerException("Method is nt allowed", null, HttpStatusCode.METHOD_NOT_ALLOWED);
@@ -28,11 +28,11 @@ public class RequestHandler {
                 responseWriter.setContent(resourceReader.readByteContent(request.getUrl()));
                 responseWriter.writeContent();
             } catch (WebServerException e) {
-                System.out.println("[ERROR] " + e.getMessage());
+                System.out.println(Thread.currentThread().getName() + " [ERROR] " + e.getMessage());
                 responseWriter.writeStatusLine(e.getHttpStatusCode());
                 throw new RuntimeException(e.getCause());
             } catch (Exception e) {
-                System.out.println("[ERROR] Exception during processing request");
+                System.out.println(Thread.currentThread().getName() + " [ERROR] Exception during processing request");
                 responseWriter.writeStatusLine(HttpStatusCode.INTERNAL_ERROR);
             }
         }
@@ -44,5 +44,14 @@ public class RequestHandler {
 
     public void setSocketOS(BufferedOutputStream socketOS) {
         this.socketOS = socketOS;
+    }
+
+    @Override
+    public void run() {
+        try {
+            handle();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
